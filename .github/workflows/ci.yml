@@ -1,0 +1,41 @@
+name: CI Pipeline
+# Nome da workflow — aparece na interface do GitHub Actions e ajuda a turma identificar o job.
+
+on: [push, pull_request]
+# Gatilhos que disparam a workflow:
+# - push: quando alguém envia commits (qualquer branch)
+# - pull_request: quando uma PR é aberta/atualizada
+# Usar esse par é comum em exemplos didáticos: valida tanto pushes quanto PRs.
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        # Define um job chamado "build".
+        # runs-on especifica o tipo de runner (neste caso, uma VM Ubuntu mantida pelo GitHub).
+
+        steps:
+            - name: 📥 Checkout do código
+              uses: actions/checkout@v3
+              # Action oficial para "dar checkout" no repositório.
+              # Torna os arquivos do repo disponíveis no filesystem do runner (./).
+              # Sem esse step os próximos comandos não teriam acesso ao código.
+
+            - name: 🐍 Configurar Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.10"
+              # Instala e configura a versão de Python no runner.
+              # 'with' passa parâmetros à action — aqui definimos 3.10 como exemplo.
+
+            - name: 📦 Instalar dependências
+              run: pip install -r requirements.txt
+              # Executa um comando shell no runner.
+              # Instala as dependências listadas em requirements.txt (ex.: pytest).
+
+            - name: 🧪 Rodar testes
+              run: PYTHONPATH=. pytest tests/
+              # Executa os testes com pytest.
+              # Prefixamos com PYTHONPATH=. para garantir que o diretório raiz do repo
+              # (onde pode estar main.py) esteja no caminho de importação do Python
+              # — útil quando os testes importam módulos da raiz.
+              # 'pytest tests/' diz ao pytest para rodar a pasta tests/.
